@@ -15,6 +15,7 @@ export default function CategoryPage() {
       console.error("Error fetching data:", error);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []);

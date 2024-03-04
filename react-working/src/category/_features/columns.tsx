@@ -1,8 +1,15 @@
 import { Button, Flex, Switch } from "antd";
+import axios from "axios";
 import moment from "moment";
 
-const onChange = (checked) => {
-  console.log(checked);
+const onChange = async (checked: string, id: string) => {
+  const res = await axios.put(
+    "https://pod-system-api-git-develop-sontran.vercel.app/api/category",
+    {
+      _id: id,
+      status: checked,
+    }
+  );
 };
 
 export const columns = () => {
@@ -24,7 +31,9 @@ export const columns = () => {
       render: (value: string, record: any) => (
         <Switch
           defaultChecked={value === "ON" ? true : false}
-          onChange={onChange}
+          onChange={() => {
+            onChange(value === "ON" ? "OFF" : "ON", record._id);
+          }}
         />
       ),
     },
@@ -32,13 +41,15 @@ export const columns = () => {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value: string, record: any) => moment().format("MM DD YYYY"),
+      render: (value: string, record: any) =>
+        moment(value).format("YYYY/MM/DD"),
     },
     {
       title: "Update At",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (value: string, record: any) => moment().format("MM DD YYYY"),
+      render: (value: string, record: any) =>
+        moment(value).format("YYYY/MM/DD"),
     },
     {
       title: "Action",
