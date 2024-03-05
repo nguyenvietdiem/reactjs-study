@@ -31,6 +31,8 @@ export const columns = ({ fetchData, showModalEdit }: any) => {
       key: "status",
       render: (value: string, record: any) => (
         <Switch
+          checkedChildren="ON"
+          unCheckedChildren="OFF"
           defaultChecked={value === "ON" ? true : false}
           onChange={() => {
             onChange(value === "ON" ? "OFF" : "ON", record._id, fetchData);
