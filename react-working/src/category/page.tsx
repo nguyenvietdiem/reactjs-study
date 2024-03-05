@@ -69,13 +69,18 @@ export default function CategoryPage() {
   const onSubmit = async (data: any) => {
     try {
       if (isEditing) {
-        console.log("edit", data);
+        const updateData = {};
+        if (data.name !== selectedCategory.name) {
+          updateData["name"] = data.name;
+        }
+        if (data.description !== selectedCategory.description) {
+          updateData["description"] = data.description;
+        }
         const res = await axios.put(
           "https://pod-system-api-git-develop-sontran.vercel.app/api/category",
           {
             _id: data._id,
-            name: data.name,
-            description: data.description,
+            ...updateData,
           }
         );
         if (res) {
@@ -84,7 +89,6 @@ export default function CategoryPage() {
           fetchData();
         }
       } else {
-        console.log("add", isEditing);
         const res = await axios.post(
           "https://pod-system-api-git-develop-sontran.vercel.app/api/category",
           {
@@ -105,7 +109,6 @@ export default function CategoryPage() {
 
   const handleChangeSelect = (value: any) => {
     setSelectedValue(value);
-    console.log(value);
   };
 
   return (
