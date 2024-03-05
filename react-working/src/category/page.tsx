@@ -1,4 +1,4 @@
-import { Button, Modal, Table } from "antd";
+import { Button, Flex, Modal, Select, Table } from "antd";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { columns } from "./_features/columns";
@@ -16,6 +16,7 @@ export default function CategoryPage() {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedValue, setSelectedValue] = useState("all");
 
   const fetchData = async () => {
     try {
@@ -102,14 +103,35 @@ export default function CategoryPage() {
     }
   };
 
+  const handleChangeSelect = (value: any) => {
+    setSelectedValue(value);
+    console.log(value);
+  };
+
   return (
     <div>
-      <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
-        Create category
-      </Button>
+      <Flex justify="space-between">
+        <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
+          Create category
+        </Button>
+        <Select
+          defaultValue="All"
+          style={{ width: 120 }}
+          onChange={handleChangeSelect}
+          options={[
+            { value: "all", label: "All" },
+            { value: "ON", label: "ON" },
+            { value: "OFF", label: "OFF" },
+          ]}
+        />
+      </Flex>
       <Table
         rowKey="_id"
-        dataSource={data}
+        dataSource={
+          selectedValue === "all"
+            ? data
+            : data.filter((item) => item.status === selectedValue)
+        }
         columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />
       <Modal
