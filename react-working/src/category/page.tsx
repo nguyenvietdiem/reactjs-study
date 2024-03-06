@@ -45,8 +45,6 @@ export default function CategoryPage() {
 
   const showModalEdit = (category: any) => {
     setSelectedCategory(category);
-    console.log(category);
-
     setIsEditing(true);
     setIsModalOpen(true);
   };
