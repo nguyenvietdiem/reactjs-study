@@ -9,6 +9,7 @@ type FieldType = {
   _id?: string;
   categoryId?: string;
   productName?: string;
+  productImage?: string;
   price?: any;
   productFormat?: any;
   productDescription?: string;
@@ -19,6 +20,7 @@ type FieldType = {
 };
 export default function ProductPage() {
   const [data, setData] = useState([]);
+  const [dataCategory, setDataCategory] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fetchData = async () => {
     try {
@@ -30,12 +32,24 @@ export default function ProductPage() {
       console.log("Error");
     }
   };
+  const fetchDataCategory = async () => {
+    try {
+      const resCate = await axios.get(
+        "https://pod-system-api-git-develop-sontran.vercel.app/api/category"
+      );
+      setDataCategory(resCate.data);
+    } catch {
+      console.log("Error");
+    }
+  };
   useEffect(() => {
     fetchData();
+    fetchDataCategory();
   }, []);
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    reset();
   };
 
   const showModal = () => {
@@ -48,6 +62,36 @@ export default function ProductPage() {
     formState: { errors },
     handleSubmit,
   } = useForm<FieldType>();
+
+  const onSubmit = async (data: any) => {
+    try {
+      const res = await axios.post(
+        "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
+        {
+          productName: data.productName,
+          categoryId: data.categoryId,
+          price: data.price,
+          productFormat: data.productFormat,
+          productDescription: data.productDescription,
+          quantity: data.quantity,
+          productImage:
+            "https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w1200/2023/10/free-images.jpg",
+          inStock: data.inStock,
+          cost: data.cost,
+          note: data.note,
+        }
+      );
+      console.log(res);
+
+      if (res) {
+        reset();
+        setIsModalOpen(false);
+        fetchData();
+      }
+    } catch {
+      console.log("Error");
+    }
+  };
 
   return (
     <div>
@@ -76,6 +120,58 @@ export default function ProductPage() {
             />
             <ErrorMessage errors={errors} name="productName" />
           </div>
+          <div className="form-item">
+            <label htmlFor="">Category *</label>
+            <select {...register("categoryId")}>
+              {dataCategory.map((category: any) => (
+                <option value={category._id} key={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <ErrorMessage errors={errors} name="productName" />
+          </div>
+          <div className="form-item">
+            <label htmlFor="">Type/Color</label>
+            <textarea
+              {...register("productFormat")}
+              placeholder="Nhập mỗi loại nằm trên một dòng"
+            ></textarea>
+          </div>
+          <div className="form-item">
+            <label htmlFor="">Description</label>
+            <textarea
+              {...register("productDescription")}
+              placeholder="Nội dung"
+            ></textarea>
+          </div>
+          <div className="form-item">
+            <label htmlFor="">Quantity</label>
+            <input {...register("quantity")} placeholder="0" />
+          </div>
+          <div className="form-item">
+            <label htmlFor="">Cost</label>
+            <input {...register("cost")} placeholder="0" />
+          </div>
+          <div className="form-item">
+            <label htmlFor="">Price</label>
+            <input {...register("price")} placeholder="0" />
+          </div>
+          <div className="form-item">
+            <label htmlFor="">InStock</label>
+            <input {...register("inStock")} placeholder="0" />
+          </div>
+          <div className="form-item">
+            <label htmlFor="">Note *</label>
+            <input
+              {...register("note", { required: "This is required." })}
+              placeholder="Thêm mới"
+            />
+            <ErrorMessage errors={errors} name="note" />
+          </div>
+          <Button onClick={handleSubmit(onSubmit)} type="primary">
+            Send
+          </Button>
         </form>
       </Modal>
     </div>
