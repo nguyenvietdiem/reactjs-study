@@ -1,4 +1,4 @@
-import { Button, Flex, Modal, Table } from "antd";
+import { Button, Flex, Modal, Table, Upload, UploadFile } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { columns } from "./_features/columns";
@@ -22,6 +22,7 @@ export default function ProductPage() {
   const [data, setData] = useState([]);
   const [dataCategory, setDataCategory] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const fetchData = async () => {
     try {
       const res = await axios.get(
@@ -92,7 +93,12 @@ export default function ProductPage() {
       console.log("Error");
     }
   };
-
+  const uploadButton = (
+    <button type="button">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </button>
+  );
   return (
     <div>
       <Flex justify="space-between">
@@ -144,6 +150,15 @@ export default function ProductPage() {
               {...register("productDescription")}
               placeholder="Nội dung"
             ></textarea>
+          </div>
+          <div className="form-item">
+            <Upload
+              action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+              listType="picture-card"
+              fileList={fileList}
+            >
+              {fileList.length >= 8 ? null : uploadButton}
+            </Upload>
           </div>
           <div className="form-item">
             <label htmlFor="">Quantity</label>
