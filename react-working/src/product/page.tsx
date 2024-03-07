@@ -1,21 +1,22 @@
-import { Button, Flex, Modal, Table, Upload, UploadFile } from "antd";
+import { Button, Flex, Modal, Select, Table, Upload, UploadFile } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { columns } from "./_features/columns";
 import { PlusOutlined } from "@ant-design/icons";
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
+import { NavigationType } from "react-router-dom";
 type FieldType = {
   _id?: string;
   categoryId?: string;
   productName?: string;
   productImage?: string;
-  price?: any;
-  productFormat?: any;
+  price?: string;
+  productFormat?: string;
   productDescription?: string;
-  quantity?: any;
-  inStock?: any;
-  cost?: any;
+  quantity?: number;
+  inStock?: boolean;
+  cost?: string;
   note?: string;
 };
 export default function ProductPage() {
@@ -23,6 +24,11 @@ export default function ProductPage() {
   const [dataCategory, setDataCategory] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [inStockChecked, setInStockChecked] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedValueStatus, setSelectedValueStatus] = useState("all");
+
   const fetchData = async () => {
     try {
       const res = await axios.get(
@@ -51,43 +57,88 @@ export default function ProductPage() {
   const handleCancel = () => {
     setIsModalOpen(false);
     reset();
+    setIsEditing(false);
   };
 
   const showModal = () => {
     setIsModalOpen(true);
   };
 
+  const showModalEdit = (product: any) => {
+    setIsModalOpen(true);
+    setSelectedProduct(product);
+    setIsEditing(true);
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInStockChecked(e.target.checked);
+  };
+
+  useEffect(() => {
+    if (selectedProduct) {
+      setValue("_id", selectedProduct.id);
+      setValue("productName", selectedProduct.productName);
+      setValue("categoryId", selectedProduct.categoryId);
+      setValue("productFormat", selectedProduct.productFormat);
+      setValue("productDescription", selectedProduct.productDescription);
+    }
+  }, [selectedProduct]);
   const {
     register,
     reset,
+    setValue,
     formState: { errors },
     handleSubmit,
   } = useForm<FieldType>();
 
   const onSubmit = async (data: any) => {
     try {
-      const res = await axios.post(
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
-        {
-          productName: data.productName,
-          categoryId: data.categoryId,
-          price: data.price,
-          productFormat: data.productFormat,
-          productDescription: data.productDescription,
-          quantity: data.quantity,
-          productImage:
-            "https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w1200/2023/10/free-images.jpg",
-          inStock: data.inStock,
-          cost: data.cost,
-          note: data.note,
+      if (isEditing) {
+        const updateData = {};
+        if (data.productName !== selectedProduct.productName) {
+          updateData["productName"] = data.productName;
         }
-      );
-      console.log(res);
-
-      if (res) {
-        reset();
-        setIsModalOpen(false);
-        fetchData();
+        const productFormatArray = data.productFormat.split("\n");
+        const res = await axios.put(
+          "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
+          {
+            _id: data._id,
+            productFormat: productFormatArray,
+            productDescription: data.productDescription,
+            categoryId: data.categoryId,
+            productImage:
+              "https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg",
+            ...updateData,
+          }
+        );
+        if (res) {
+          reset();
+          setIsModalOpen(false);
+          fetchData();
+        }
+      } else {
+        const productFormatArray = data.productFormat.split("\n");
+        const res = await axios.post(
+          "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
+          {
+            productName: data.productName,
+            categoryId: data.categoryId,
+            price: data.price,
+            productFormat: productFormatArray,
+            productDescription: data.productDescription,
+            quantity: data.quantity,
+            productImage:
+              "https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w1200/2023/10/free-images.jpg",
+            inStock: inStockChecked,
+            cost: data.cost,
+            note: data.note,
+          }
+        );
+        if (res) {
+          reset();
+          setIsModalOpen(false);
+          fetchData();
+        }
       }
     } catch {
       console.log("Error");
@@ -99,14 +150,38 @@ export default function ProductPage() {
       <div style={{ marginTop: 8 }}>Upload</div>
     </button>
   );
+
+  const handleChangeSelect = (value: any) => {
+    setSelectedValueStatus(value);
+  };
   return (
     <div>
       <Flex justify="space-between">
         <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
           New product
         </Button>
+        <div>
+          <Select
+            defaultValue="All"
+            style={{ width: 120 }}
+            onChange={handleChangeSelect}
+            options={[
+              { value: "all", label: "All" },
+              { value: "ON", label: "ON" },
+              { value: "OFF", label: "OFF" },
+            ]}
+          />
+        </div>
       </Flex>
-      <Table rowKey="_id" dataSource={data} columns={columns()} />
+      <Table
+        rowKey="_id"
+        dataSource={
+          selectedValueStatus === "all"
+            ? data
+            : data.filter((item) => item.status === selectedValueStatus)
+        }
+        columns={columns({ fetchData, showModalEdit: showModalEdit })}
+      />
 
       <Modal
         title="Create product"
@@ -119,6 +194,7 @@ export default function ProductPage() {
         onCancel={handleCancel}
       >
         <form>
+          <input type="hidden" {...register("_id")} />
           <div className="form-item">
             <label htmlFor="">Name *</label>
             <input
@@ -135,7 +211,7 @@ export default function ProductPage() {
                 </option>
               ))}
             </select>
-            <ErrorMessage errors={errors} name="productName" />
+            <ErrorMessage errors={errors} name="categoryId" />
           </div>
           <div className="form-item">
             <label htmlFor="">Type/Color</label>
@@ -160,29 +236,39 @@ export default function ProductPage() {
               {fileList.length >= 8 ? null : uploadButton}
             </Upload>
           </div>
-          <div className="form-item">
-            <label htmlFor="">Quantity</label>
-            <input {...register("quantity")} placeholder="0" />
-          </div>
-          <div className="form-item">
-            <label htmlFor="">Cost</label>
-            <input {...register("cost")} placeholder="0" />
-          </div>
-          <div className="form-item">
-            <label htmlFor="">Price</label>
-            <input {...register("price")} placeholder="0" />
-          </div>
-          <div className="form-item">
-            <label htmlFor="">InStock</label>
-            <input {...register("inStock")} placeholder="0" />
-          </div>
-          <div className="form-item">
-            <label htmlFor="">Note *</label>
-            <input
-              {...register("note", { required: "This is required." })}
-              placeholder="Thêm mới"
-            />
-            <ErrorMessage errors={errors} name="note" />
+
+          <div style={{ display: isEditing ? "none" : "block" }}>
+            <div className="form-item">
+              <label htmlFor="">Quantity</label>
+              <input {...register("quantity")} placeholder="0" />
+            </div>
+            <div className="form-item">
+              <label htmlFor="">Cost</label>
+              <input {...register("cost")} placeholder="0" />
+            </div>
+            <div className="form-item">
+              <label htmlFor="">Price</label>
+              <input {...register("price")} placeholder="0" />
+            </div>
+            <div className="form-item">
+              <label htmlFor="">InStock</label>
+              <input
+                {...register("inStock")}
+                type="checkbox"
+                checked={inStockChecked}
+                onChange={handleCheckboxChange}
+              />
+            </div>
+            <div className="form-item">
+              <label htmlFor="">Note *</label>
+              <input
+                {...register("note", {
+                  required: isEditing ? false : "This is required.",
+                })}
+                placeholder="Thêm mới"
+              />
+              <ErrorMessage errors={errors} name="note" />
+            </div>
           </div>
           <Button onClick={handleSubmit(onSubmit)} type="primary">
             Send

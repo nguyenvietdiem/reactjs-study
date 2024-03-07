@@ -1,7 +1,18 @@
 import { Button, Switch } from "antd";
+import axios from "axios";
 import moment from "moment";
 
-export const columns = () => {
+const onChange = async (checked: string, id: string, fetchData: Function) => {
+  const res = await axios.put(
+    "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
+    {
+      _id: id,
+      status: checked,
+    }
+  );
+  fetchData();
+};
+export const columns = ({ fetchData, showModalEdit }: any) => {
   return [
     {
       title: "Product name",
@@ -31,9 +42,9 @@ export const columns = () => {
           checkedChildren="ON"
           unCheckedChildren="OFF"
           defaultChecked={value === "ON" ? true : false}
-          //   onChange={() => {
-          //     onChange(value === "ON" ? "OFF" : "ON", record._id, fetchData);
-          //   }}
+          onChange={() => {
+            onChange(value === "ON" ? "OFF" : "ON", record._id, fetchData);
+          }}
         />
       ),
     },
@@ -55,7 +66,22 @@ export const columns = () => {
       title: "Action",
       dataIndex: "action",
       key: "action",
-      render: (value: any, record: any) => <Button type="primary">Edit</Button>,
+      render: (value: any, record: any) => (
+        <Button
+          type="primary"
+          onClick={() => {
+            showModalEdit({
+              id: record._id,
+              productName: record.productName,
+              productFormat: record.productFormat,
+              productDescription: record.productDescription,
+              categoryId: record.category._id,
+            });
+          }}
+        >
+          Edit
+        </Button>
+      ),
     },
   ];
 };
