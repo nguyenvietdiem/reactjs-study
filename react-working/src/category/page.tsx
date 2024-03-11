@@ -67,7 +67,7 @@ export default function CategoryPage() {
   const onSubmit = async (data: any) => {
     try {
       if (isEditing) {
-        const updateData = {};
+        const updateData:any = {};
         if (data.name !== selectedCategory.name) {
           updateData["name"] = data.name;
         }
@@ -131,7 +131,7 @@ export default function CategoryPage() {
         dataSource={
           selectedValue === "all"
             ? data
-            : data.filter((item) => item.status === selectedValue)
+            : data.filter((item: any) => item.status === selectedValue)
         }
         columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />

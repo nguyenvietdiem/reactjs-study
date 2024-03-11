@@ -1,4 +1,13 @@
-import { Button, Flex, Modal, Select, Table, Upload, UploadFile } from "antd";
+import {
+  Button,
+  Flex,
+  Input,
+  Modal,
+  Select,
+  Table,
+  Upload,
+  UploadFile,
+} from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { columns } from "./_features/columns";
@@ -6,6 +15,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
 import { NavigationType } from "react-router-dom";
+import { useDebounce } from "use-debounce";
 type FieldType = {
   _id?: string;
   categoryId?: string;
@@ -28,6 +38,9 @@ export default function ProductPage() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedValueStatus, setSelectedValueStatus] = useState("all");
+  const [selectedValueCategory, setSelectedValueCategory] = useState("all");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedValue] = useDebounce(searchKeyword, 300);
 
   const fetchData = async () => {
     try {
@@ -94,7 +107,7 @@ export default function ProductPage() {
   const onSubmit = async (data: any) => {
     try {
       if (isEditing) {
-        const updateData = {};
+        const updateData: any = {};
         if (data.productName !== selectedProduct.productName) {
           updateData["productName"] = data.productName;
         }
@@ -154,6 +167,15 @@ export default function ProductPage() {
   const handleChangeSelect = (value: any) => {
     setSelectedValueStatus(value);
   };
+
+  const handleChangeSelectCategory = (value: any) => {
+    setSelectedValueCategory(value);
+  };
+
+  const handelSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(e.target.value);
+  };
+
   return (
     <div>
       <Flex justify="space-between">
@@ -161,6 +183,20 @@ export default function ProductPage() {
           New product
         </Button>
         <div>
+          <Select
+            defaultValue="All category"
+            style={{ width: 250 }}
+            onChange={handleChangeSelectCategory}
+          >
+            <Select.Option value="all" key="all">
+              All category
+            </Select.Option>
+            {dataCategory.map((category: any) => (
+              <Select.Option value={category._id} key={category._id}>
+                {category.name}
+              </Select.Option>
+            ))}
+          </Select>
           <Select
             defaultValue="All"
             style={{ width: 120 }}
@@ -171,14 +207,40 @@ export default function ProductPage() {
               { value: "OFF", label: "OFF" },
             ]}
           />
+
+          <Input.Search
+            placeholder="Search name product"
+            onChange={handelSearch}
+            style={{ width: 200 }}
+          />
         </div>
       </Flex>
       <Table
         rowKey="_id"
         dataSource={
           selectedValueStatus === "all"
-            ? data
-            : data.filter((item) => item.status === selectedValueStatus)
+            ? selectedValueCategory === "all"
+              ? searchKeyword === ""
+                ? data
+                : data.filter((item: any) =>
+                    item.productName
+                      .toLowerCase()
+                      .includes(debouncedValue.toLowerCase())
+                  )
+              : data.filter(
+                  (item: any) =>
+                    item.category._id === selectedValueCategory &&
+                    item.productName
+                      .toLowerCase()
+                      .includes(debouncedValue.toLowerCase())
+                )
+            : data.filter(
+                (item: any) =>
+                  item.status === selectedValueStatus &&
+                  item.productName
+                    .toLowerCase()
+                    .includes(debouncedValue.toLowerCase())
+              )
         }
         columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />
