@@ -14,8 +14,6 @@ import { columns } from "./_features/columns";
 import { PlusOutlined } from "@ant-design/icons";
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
-import { NavigationType } from "react-router-dom";
-import { useDebounce } from "use-debounce";
 type FieldType = {
   _id?: string;
   categoryId?: string;
@@ -29,12 +27,6 @@ type FieldType = {
   cost?: string;
   note?: string;
 };
-
-interface ProductFilter {
-  status?: string;
-  categoryId?: string;
-  productName?: string;
-}
 export default function ProductPage() {
   const [data, setData] = useState([]);
   const [dataCategory, setDataCategory] = useState<any>([]);
