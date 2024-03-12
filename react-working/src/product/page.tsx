@@ -29,6 +29,12 @@ type FieldType = {
   cost?: string;
   note?: string;
 };
+
+interface ProductFilter {
+  status?: string;
+  categoryId?: string;
+  productName?: string;
+}
 export default function ProductPage() {
   const [data, setData] = useState([]);
   const [dataCategory, setDataCategory] = useState<any>([]);
@@ -37,19 +43,31 @@ export default function ProductPage() {
   const [inStockChecked, setInStockChecked] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedValueStatus, setSelectedValueStatus] = useState("all");
-  const [selectedValueCategory, setSelectedValueCategory] = useState("all");
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [debouncedValue] = useDebounce(searchKeyword, 300);
+  const [productName, setProductName] = useState("");
+  const [status, setStatus] = useState("");
+  const [categoryId, setCategoryId] = useState("");
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/product"
-      );
+      let url =
+        "https://pod-system-api-git-develop-sontran.vercel.app/api/product";
+      let queryParams = [];
+      if (status !== "all" && status !== "") {
+        queryParams.push(`status=${status}`);
+      }
+      if (categoryId !== "all" && categoryId !== "") {
+        queryParams.push(`categoryId=${categoryId}`);
+      }
+      if (productName !== "") {
+        queryParams.push(`productName=${productName}`);
+      }
+      if (queryParams.length > 0) {
+        url += `?${queryParams.join("&")}`;
+      }
+      const res = await axios.get(url);
       setData(res.data);
-    } catch {
-      console.log("Error");
+    } catch (error) {
+      console.log("Error:", error);
     }
   };
   const fetchDataCategory = async () => {
@@ -65,7 +83,7 @@ export default function ProductPage() {
   useEffect(() => {
     fetchData();
     fetchDataCategory();
-  }, []);
+  }, [status, categoryId, productName]);
 
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -164,16 +182,15 @@ export default function ProductPage() {
     </button>
   );
 
-  const handleChangeSelect = (value: any) => {
-    setSelectedValueStatus(value);
+  const handleStatusChange = (value: any) => {
+    setStatus(value);
   };
-
-  const handleChangeSelectCategory = (value: any) => {
-    setSelectedValueCategory(value);
+  const handleCategoryChange = (value: any) => {
+    setCategoryId(value);
   };
 
   const handelSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchKeyword(e.target.value);
+    setProductName(e.target.value);
   };
 
   return (
@@ -186,7 +203,7 @@ export default function ProductPage() {
           <Select
             defaultValue="All category"
             style={{ width: 250 }}
-            onChange={handleChangeSelectCategory}
+            onChange={handleCategoryChange}
           >
             <Select.Option value="all" key="all">
               All category
@@ -200,7 +217,7 @@ export default function ProductPage() {
           <Select
             defaultValue="All"
             style={{ width: 120 }}
-            onChange={handleChangeSelect}
+            onChange={handleStatusChange}
             options={[
               { value: "all", label: "All" },
               { value: "ON", label: "ON" },
@@ -209,39 +226,15 @@ export default function ProductPage() {
           />
 
           <Input.Search
-            placeholder="Search name product"
             onChange={handelSearch}
+            placeholder="Search name product"
             style={{ width: 200 }}
           />
         </div>
       </Flex>
       <Table
         rowKey="_id"
-        dataSource={
-          selectedValueStatus === "all"
-            ? selectedValueCategory === "all"
-              ? searchKeyword === ""
-                ? data
-                : data.filter((item: any) =>
-                    item.productName
-                      .toLowerCase()
-                      .includes(debouncedValue.toLowerCase())
-                  )
-              : data.filter(
-                  (item: any) =>
-                    item.category._id === selectedValueCategory &&
-                    item.productName
-                      .toLowerCase()
-                      .includes(debouncedValue.toLowerCase())
-                )
-            : data.filter(
-                (item: any) =>
-                  item.status === selectedValueStatus &&
-                  item.productName
-                    .toLowerCase()
-                    .includes(debouncedValue.toLowerCase())
-              )
-        }
+        dataSource={data}
         columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />
 
