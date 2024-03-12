@@ -16,14 +16,17 @@ export default function CategoryPage() {
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedValue, setSelectedValue] = useState("all");
+  const [status, setStatus] = useState("");
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/category"
-      );
-      setData(response.data);
+      let url =
+        "https://pod-system-api-git-develop-sontran.vercel.app/api/category";
+      if (status !== "all") {
+        url += `?status=${status}`;
+      }
+      const res = await axios.get(url);
+      setData(res.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -31,7 +34,7 @@ export default function CategoryPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [status]);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -67,7 +70,7 @@ export default function CategoryPage() {
   const onSubmit = async (data: any) => {
     try {
       if (isEditing) {
-        const updateData:any = {};
+        const updateData: any = {};
         if (data.name !== selectedCategory.name) {
           updateData["name"] = data.name;
         }
@@ -106,7 +109,7 @@ export default function CategoryPage() {
   };
 
   const handleChangeSelect = (value: any) => {
-    setSelectedValue(value);
+    setStatus(value);
   };
 
   return (
@@ -128,11 +131,7 @@ export default function CategoryPage() {
       </Flex>
       <Table
         rowKey="_id"
-        dataSource={
-          selectedValue === "all"
-            ? data
-            : data.filter((item: any) => item.status === selectedValue)
-        }
+        dataSource={data}
         columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />
       <Modal
