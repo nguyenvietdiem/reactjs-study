@@ -1,13 +1,4 @@
-import {
-  Button,
-  Flex,
-  Input,
-  Modal,
-  Select,
-  Table,
-  Upload,
-  UploadFile,
-} from "antd";
+import { Button, Flex, Input, Modal, Select, Table } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { columns } from "./_features/columns";
@@ -31,13 +22,13 @@ export default function ProductPage() {
   const [data, setData] = useState([]);
   const [dataCategory, setDataCategory] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [inStockChecked, setInStockChecked] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [productName, setProductName] = useState("");
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [imageData, setImageData] = useState<any>("");
 
   const fetchData = async () => {
     try {
@@ -85,14 +76,15 @@ export default function ProductPage() {
 
   const showModal = () => {
     setIsModalOpen(true);
+    setImageData("");
   };
 
   const showModalEdit = (product: any) => {
     setIsModalOpen(true);
     setSelectedProduct(product);
     setIsEditing(true);
+    setImageData(product.productImage);
   };
-
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInStockChecked(e.target.checked);
   };
@@ -104,6 +96,7 @@ export default function ProductPage() {
       setValue("categoryId", selectedProduct.categoryId);
       setValue("productFormat", selectedProduct.productFormat);
       setValue("productDescription", selectedProduct.productDescription);
+      setFocus("productName");
     }
   }, [selectedProduct]);
   const {
@@ -112,6 +105,7 @@ export default function ProductPage() {
     setValue,
     formState: { errors },
     handleSubmit,
+    setFocus,
   } = useForm<FieldType>();
 
   const onSubmit = async (data: any) => {
@@ -121,19 +115,18 @@ export default function ProductPage() {
         if (data.productName !== selectedProduct.productName) {
           updateData["productName"] = data.productName;
         }
-        const productFormatArray = data.productFormat.split("\n");
         const res = await axios.put(
           "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
           {
             _id: data._id,
-            productFormat: productFormatArray,
-            productDescription: data.productDescription,
             categoryId: data.categoryId,
-            productImage:
-              "https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg",
+            productFormat: data.productFormat,
+            productDescription: data.productDescription,
+            productImage: imageData,
             ...updateData,
           }
         );
+
         if (res) {
           reset();
           setIsModalOpen(false);
@@ -150,8 +143,7 @@ export default function ProductPage() {
             productFormat: productFormatArray,
             productDescription: data.productDescription,
             quantity: data.quantity,
-            productImage:
-              "https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w1200/2023/10/free-images.jpg",
+            productImage: imageData,
             inStock: inStockChecked,
             cost: data.cost,
             note: data.note,
@@ -163,16 +155,10 @@ export default function ProductPage() {
           fetchData();
         }
       }
-    } catch {
-      console.log("Error");
+    } catch (error: any) {
+      console.log(error.toString());
     }
   };
-  const uploadButton = (
-    <button type="button">
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
 
   const handleStatusChange = (value: any) => {
     setStatus(value);
@@ -184,6 +170,32 @@ export default function ProductPage() {
   const handelSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProductName(e.target.value);
   };
+
+  const handleUploadImage = (e: any) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const res = await axios.post(
+        "https://pod-system-api-git-develop-sontran.vercel.app/api/image/upload",
+        {
+          image: reader.result,
+          fileName: file.name,
+        }
+      );
+      setImageData(res.data.url);
+      console.log(imageData);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      setTimeout(() => {
+        setFocus("productName");
+      }, 100);
+    }
+  }, [isModalOpen]);
 
   return (
     <div>
@@ -275,14 +287,18 @@ export default function ProductPage() {
             ></textarea>
           </div>
           <div className="form-item">
-            <Upload
-              action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
-              listType="picture-card"
-              fileList={fileList}
-            >
-              {fileList.length >= 8 ? null : uploadButton}
-            </Upload>
+            <input
+              type="file"
+              id="image"
+              accept=".png, .jpg, .jpeg"
+              onChange={handleUploadImage}
+            />
           </div>
+          {imageData ? (
+            <div className="form-item">
+              <img src={imageData} alt="" width={100} height={100} />
+            </div>
+          ) : null}
 
           <div style={{ display: isEditing ? "none" : "block" }}>
             <div className="form-item">
