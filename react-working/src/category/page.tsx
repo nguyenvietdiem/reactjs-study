@@ -66,6 +66,7 @@ export default function CategoryPage() {
     setValue,
     formState: { errors },
     handleSubmit,
+    setFocus,
   } = useForm<FieldType>();
   const onSubmit = async (data: any) => {
     try {
@@ -111,6 +112,13 @@ export default function CategoryPage() {
   const handleChangeSelect = (value: any) => {
     setStatus(value);
   };
+  useEffect(() => {
+    if (isModalOpen) {
+      setTimeout(() => {
+        setFocus("name");
+      }, 100);
+    }
+  }, [isModalOpen]);
 
   return (
     <div>

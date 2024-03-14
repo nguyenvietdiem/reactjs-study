@@ -5,6 +5,7 @@ import { columns } from "./_features/columns";
 import { PlusOutlined } from "@ant-design/icons";
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
+import { useDebounce } from "use-debounce";
 type FieldType = {
   _id?: string;
   categoryId?: string;
@@ -29,7 +30,7 @@ export default function ProductPage() {
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [imageData, setImageData] = useState<any>("");
-
+  const [debouncedValue] = useDebounce(productName, 600);
   const fetchData = async () => {
     try {
       let url =
@@ -66,7 +67,7 @@ export default function ProductPage() {
   useEffect(() => {
     fetchData();
     fetchDataCategory();
-  }, [status, categoryId, productName]);
+  }, [status, categoryId, debouncedValue]);
 
   const handleCancel = () => {
     setIsModalOpen(false);
