@@ -97,7 +97,6 @@ export default function ProductPage() {
       setValue("categoryId", selectedProduct.categoryId);
       setValue("productFormat", selectedProduct.productFormat);
       setValue("productDescription", selectedProduct.productDescription);
-      setFocus("productName");
     }
   }, [selectedProduct]);
   const {
@@ -135,18 +134,21 @@ export default function ProductPage() {
         }
       } else {
         const productFormatArray = data.productFormat.split("\n");
+        const quantityProduct = data.quantity === "" ? 0 : data.quantity;
+        const priceProduct = data.price === "" ? 0 : data.price;
+        const costProduct = data.cost === "" ? 0 : data.cost;
         const res = await axios.post(
           "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
           {
             productName: data.productName,
             categoryId: data.categoryId,
-            price: data.price,
+            price: priceProduct,
             productFormat: productFormatArray,
             productDescription: data.productDescription,
-            quantity: data.quantity,
+            quantity: quantityProduct,
             productImage: imageData,
             inStock: inStockChecked,
-            cost: data.cost,
+            cost: costProduct,
             note: data.note,
           }
         );
@@ -244,7 +246,7 @@ export default function ProductPage() {
       />
 
       <Modal
-        title="Create product"
+        title={isEditing ? "Edit Product" : "Create product"}
         footer={[
           <Button key="back" onClick={handleCancel}>
             Close
@@ -329,7 +331,6 @@ export default function ProductPage() {
                 {...register("note", {
                   required: isEditing ? false : "This is required.",
                 })}
-                placeholder="Thêm mới"
               />
               <ErrorMessage errors={errors} name="note" />
             </div>
