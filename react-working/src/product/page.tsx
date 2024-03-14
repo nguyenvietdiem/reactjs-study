@@ -31,6 +31,7 @@ export default function ProductPage() {
   const [categoryId, setCategoryId] = useState("");
   const [imageData, setImageData] = useState<any>("");
   const [debouncedValue] = useDebounce(productName, 600);
+
   const fetchData = async () => {
     try {
       let url =
@@ -266,14 +267,20 @@ export default function ProductPage() {
           </div>
           <div className="form-item">
             <label htmlFor="">Category *</label>
-            <select {...register("categoryId")}>
+            <select
+              defaultValue=""
+              {...register("categoryId", { required: true })}
+            >
+              <option value="" disabled>
+                Select category
+              </option>
               {dataCategory.map((category: any) => (
                 <option value={category._id} key={category._id}>
                   {category.name}
                 </option>
               ))}
             </select>
-            <ErrorMessage errors={errors} name="categoryId" />
+            {errors.categoryId && <span>This field is required</span>}
           </div>
           <div className="form-item">
             <label htmlFor="">Type/Color</label>
