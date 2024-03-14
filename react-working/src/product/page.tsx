@@ -95,7 +95,7 @@ export default function ProductPage() {
       setValue("_id", selectedProduct.id);
       setValue("productName", selectedProduct.productName);
       setValue("categoryId", selectedProduct.categoryId);
-      setValue("productFormat", selectedProduct.productFormat);
+      setValue("productFormat", selectedProduct.productFormat.join("\n"));
       setValue("productDescription", selectedProduct.productDescription);
     }
   }, [selectedProduct]);
