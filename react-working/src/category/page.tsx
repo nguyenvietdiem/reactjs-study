@@ -5,6 +5,7 @@ import { columns } from "./_features/columns";
 import { ErrorMessage } from "@hookform/error-message";
 import { PlusOutlined } from "@ant-design/icons";
 import { useForm } from "react-hook-form";
+import categoryAPI from "../api/categoryAPI";
 
 type FieldType = {
   _id?: string;
@@ -20,13 +21,11 @@ export default function CategoryPage() {
 
   const fetchData = async () => {
     try {
-      let url =
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/category";
-      if (status !== "all") {
-        url += `?status=${status}`;
-      }
-      const res = await axios.get(url);
-      setData(res.data);
+      const params = {
+        status: status !== "all" ? status : "",
+      };
+      const categoryList: any = await categoryAPI.getAll(params);
+      setData(categoryList);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -78,32 +77,22 @@ export default function CategoryPage() {
         if (data.description !== selectedCategory.description) {
           updateData["description"] = data.description;
         }
-        const res = await axios.put(
-          "https://pod-system-api-git-develop-sontran.vercel.app/api/category",
-          {
-            _id: data._id,
-            ...updateData,
-          }
-        );
-        if (res) {
-          reset();
-          setIsModalOpen(false);
-          fetchData();
-        }
+        const dataUpdate = {
+          _id: data._id,
+          ...updateData,
+        };
+        await categoryAPI.update(dataUpdate);
       } else {
-        const res = await axios.post(
-          "https://pod-system-api-git-develop-sontran.vercel.app/api/category",
-          {
-            name: data.name,
-            description: data.description,
-          }
-        );
-        if (res) {
-          reset();
-          setIsModalOpen(false);
-          fetchData();
-        }
+        const dataAPI = {
+          name: data.name,
+          description: data.description,
+        };
+        await categoryAPI.add(dataAPI);
       }
+      reset();
+      setIsModalOpen(false);
+      fetchData();
+      console.log();
     } catch (e) {
       console.log("Error");
     }
