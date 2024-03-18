@@ -30,6 +30,7 @@ export default function ProductPage() {
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [imageData, setImageData] = useState<any>("");
+  const [imageDelete, setImageDelete] = useState<any>("");
   const [debouncedValue] = useDebounce(productName, 600);
 
   const fetchData = async () => {
@@ -74,6 +75,7 @@ export default function ProductPage() {
     setIsModalOpen(false);
     reset();
     setIsEditing(false);
+    deleteImageUpload();
   };
 
   const showModal = () => {
@@ -186,12 +188,28 @@ export default function ProductPage() {
           fileName: file.name,
         }
       );
-      setImageData(res.data.url);
-      console.log(imageData);
+      let url = res.data.url
+      let lastIndex = url.lastIndexOf("/");
+      let questionIndex = url.indexOf("?");
+      let fileNameRemove = url.substring(lastIndex + 1, questionIndex);
+      setImageData(url);
+      setImageDelete(fileNameRemove);
+      if (imageData && fileNameRemove !== imageDelete) {
+        deleteImageUpload();
+      }
     };
 
     reader.readAsDataURL(file);
   };
+
+  const deleteImageUpload = async () => {
+    const res = await axios.post(
+      "https://pod-system-api-git-develop-sontran.vercel.app/api/image/delete",
+      {
+        fileName: imageDelete,
+      }
+    );
+  }
 
   useEffect(() => {
     if (isModalOpen) {

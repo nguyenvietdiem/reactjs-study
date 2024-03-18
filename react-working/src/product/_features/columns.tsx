@@ -24,7 +24,7 @@ export const columns = ({ fetchData, showModalEdit }: any) => {
       dataIndex: "productImage",
       key: "productImage",
       render: (value: string, record: any) => (
-        <img src={record.productImage[0]} width={100} />
+        <img src={record.productImage ? record.productImage[0] : ''} width={100} />
       ),
     },
     {
