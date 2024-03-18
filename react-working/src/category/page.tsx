@@ -68,6 +68,7 @@ export default function CategoryPage() {
     setFocus,
   } = useForm<FieldType>();
   const onSubmit = async (data: any) => {
+    let isError = false;
     try {
       if (isEditing) {
         const updateData: any = {};
@@ -89,12 +90,15 @@ export default function CategoryPage() {
         };
         await categoryAPI.add(dataAPI);
       }
+    } catch (e) {
+      console.log("Error");
+      isError = true;
+    }
+
+    if (!isError) {
       reset();
       setIsModalOpen(false);
       fetchData();
-      console.log();
-    } catch (e) {
-      console.log("Error");
     }
   };
 
