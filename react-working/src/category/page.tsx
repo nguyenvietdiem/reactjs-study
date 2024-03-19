@@ -21,9 +21,10 @@ export default function CategoryPage() {
 
   const fetchData = async () => {
     try {
-      const params = {
-        status: status !== "all" ? status : "",
-      };
+      const params: any = {};
+      if (status && status !== "all") {
+        params.status = status;
+      }
       const categoryList: any = await categoryAPI.getAll(params);
       setData(categoryList);
     } catch (error) {

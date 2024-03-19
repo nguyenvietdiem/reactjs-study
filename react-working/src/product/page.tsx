@@ -6,6 +6,9 @@ import { PlusOutlined } from "@ant-design/icons";
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
 import { useDebounce } from "use-debounce";
+import categoryAPI from "../api/categoryAPI";
+import productAPI from "../api/productAPI";
+import imageAPI from "../api/imageAPI";
 type FieldType = {
   _id?: string;
   categoryId?: string;
@@ -30,38 +33,35 @@ export default function ProductPage() {
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [imageData, setImageData] = useState<any>("");
-  const [imageDelete, setImageDelete] = useState<any>("");
+  const [imageDelete, setImageDelete] = useState("");
+  const [imageTemporarily, setImageTemporarily] = useState("");
   const [debouncedValue] = useDebounce(productName, 600);
 
   const fetchData = async () => {
     try {
-      let url =
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/product";
-      let queryParams = [];
-      if (status !== "all" && status !== "") {
-        queryParams.push(`status=${status}`);
+      const params: any = {};
+      if (status && status !== "all") {
+        params.status = status;
       }
-      if (categoryId !== "all" && categoryId !== "") {
-        queryParams.push(`categoryId=${categoryId}`);
+
+      if (categoryId && categoryId !== "all") {
+        params.categoryId = categoryId;
       }
-      if (productName !== "") {
-        queryParams.push(`productName=${productName}`);
+
+      if (productName) {
+        params.productName = productName;
       }
-      if (queryParams.length > 0) {
-        url += `?${queryParams.join("&")}`;
-      }
-      const res = await axios.get(url);
-      setData(res.data);
+
+      const res: any = await productAPI.getAll(params);
+      setData(res);
     } catch (error) {
       console.log("Error:", error);
     }
   };
   const fetchDataCategory = async () => {
     try {
-      const resCate = await axios.get(
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/category"
-      );
-      setDataCategory(resCate.data);
+      const resCate = await categoryAPI.getAll();
+      setDataCategory(resCate);
     } catch {
       console.log("Error");
     }
@@ -75,14 +75,21 @@ export default function ProductPage() {
     setIsModalOpen(false);
     reset();
     setIsEditing(false);
-    deleteImageUpload();
+    if (!isEditing) {
+      deleteImageUpload(imageDelete);
+    }
   };
 
   const showModal = () => {
     setIsModalOpen(true);
     setImageData("");
   };
-
+  const getFileNameRemove = (url: string) => {
+    const lastIndex = url.lastIndexOf("/");
+    const questionIndex = url.indexOf("?");
+    const res = url.substring(lastIndex + 1, questionIndex);
+    return res;
+  };
   const showModalEdit = (product: any) => {
     setIsModalOpen(true);
     setSelectedProduct(product);
@@ -112,57 +119,48 @@ export default function ProductPage() {
   } = useForm<FieldType>();
 
   const onSubmit = async (data: any) => {
+    let isError = false;
     try {
       if (isEditing) {
         const updateData: any = {};
         if (data.productName !== selectedProduct.productName) {
           updateData["productName"] = data.productName;
         }
-        const res = await axios.put(
-          "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
-          {
-            _id: data._id,
-            categoryId: data.categoryId,
-            productFormat: data.productFormat,
-            productDescription: data.productDescription,
-            productImage: imageData,
-            ...updateData,
-          }
-        );
-
-        if (res) {
-          reset();
-          setIsModalOpen(false);
-          fetchData();
+        const dataUpdate = {
+          _id: data._id,
+          categoryId: data.categoryId,
+          productFormat: data.productFormat,
+          productDescription: data.productDescription,
+          productImage: imageData,
+          ...updateData,
+        };
+        await productAPI.update(dataUpdate);
+        if (imageTemporarily) {
+          deleteImageUpload(imageTemporarily);
         }
       } else {
-        const productFormatArray = data.productFormat.split("\n");
-        const quantityProduct = data.quantity === "" ? 0 : data.quantity;
-        const priceProduct = data.price === "" ? 0 : data.price;
-        const costProduct = data.cost === "" ? 0 : data.cost;
-        const res = await axios.post(
-          "https://pod-system-api-git-develop-sontran.vercel.app/api/product",
-          {
-            productName: data.productName,
-            categoryId: data.categoryId,
-            price: priceProduct,
-            productFormat: productFormatArray,
-            productDescription: data.productDescription,
-            quantity: quantityProduct,
-            productImage: imageData,
-            inStock: inStockChecked,
-            cost: costProduct,
-            note: data.note,
-          }
-        );
-        if (res) {
-          reset();
-          setIsModalOpen(false);
-          fetchData();
-        }
+        const dataAPI = {
+          productName: data.productName,
+          categoryId: data.categoryId,
+          price: data.price === "" ? 0 : data.price,
+          productFormat: data.productFormat.split("\n"),
+          productDescription: data.productDescription,
+          quantity: data.quantity === "" ? 0 : data.quantity,
+          productImage: imageData,
+          inStock: inStockChecked,
+          cost: data.cost === "" ? 0 : data.cost,
+          note: data.note,
+        };
+        await productAPI.add(dataAPI);
       }
     } catch (error: any) {
+      isError = true;
       console.log(error.toString());
+    }
+    if (!isError) {
+      reset();
+      setIsModalOpen(false);
+      fetchData();
     }
   };
 
@@ -181,36 +179,33 @@ export default function ProductPage() {
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onloadend = async () => {
-      const res = await axios.post(
-        "https://pod-system-api-git-develop-sontran.vercel.app/api/image/upload",
-        {
-          image: reader.result,
-          fileName: file.name,
-        }
-      );
-      let url = res.data.url
-      let lastIndex = url.lastIndexOf("/");
-      let questionIndex = url.indexOf("?");
-      let fileNameRemove = url.substring(lastIndex + 1, questionIndex);
+      const param = {
+        image: reader.result,
+        fileName: file.name,
+      };
+      const res = await imageAPI.add(param);
+      let url = res.url;
+      let fileNameRemove = getFileNameRemove(url);
       setImageData(url);
       setImageDelete(fileNameRemove);
       if (imageData && fileNameRemove !== imageDelete) {
-        deleteImageUpload();
+        deleteImageUpload(fileNameRemove);
       }
     };
-
     reader.readAsDataURL(file);
   };
 
-  const deleteImageUpload = async () => {
-    const res = await axios.post(
-      "https://pod-system-api-git-develop-sontran.vercel.app/api/image/delete",
-      {
-        fileName: imageDelete,
-      }
-    );
-  }
-
+  const deleteImageUpload = async (imageLink: any) => {
+    const param = {
+      fileName: imageLink,
+    };
+    await imageAPI.delete(param);
+  };
+  const handleDeleteTemporarily = () => {
+    setImageData("");
+    let imageNameTemporarily = getFileNameRemove(imageData[0]);
+    setImageTemporarily(imageNameTemporarily);
+  };
   useEffect(() => {
     if (isModalOpen) {
       setTimeout(() => {
@@ -325,6 +320,9 @@ export default function ProductPage() {
           {imageData ? (
             <div className="form-item">
               <img src={imageData} alt="" width={100} height={100} />
+              <Button danger onClick={handleDeleteTemporarily}>
+                Delete this image
+              </Button>
             </div>
           ) : null}
 
