@@ -1,15 +1,13 @@
-import { Button, Flex, Switch } from "antd";
-import axios from "axios";
+import { Button, Switch } from "antd";
 import moment from "moment";
+import categoryAPI from "../../api/categoryAPI";
 
 const onChange = async (checked: string, id: string, fetchData: Function) => {
-  const res = await axios.put(
-    "https://pod-system-api-git-develop-sontran.vercel.app/api/category",
-    {
-      _id: id,
-      status: checked,
-    }
-  );
+  const param = {
+    _id: id,
+    status: checked,
+  };
+  await categoryAPI.update(param);
   fetchData();
 };
 

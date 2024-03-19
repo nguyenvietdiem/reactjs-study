@@ -1,6 +1,5 @@
-import { Button, Flex, Input, Modal, Select, Table } from "antd";
+import { Button, Flex, Input, Modal, Popconfirm, Select, Table } from "antd";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { columns } from "./_features/columns";
 import { PlusOutlined } from "@ant-design/icons";
 import { ErrorMessage } from "@hookform/error-message";
@@ -34,7 +33,6 @@ export default function ProductPage() {
   const [categoryId, setCategoryId] = useState("");
   const [imageData, setImageData] = useState<any>("");
   const [imageDelete, setImageDelete] = useState("");
-  const [imageTemporarily, setImageTemporarily] = useState("");
   const [debouncedValue] = useDebounce(productName, 600);
 
   const fetchData = async () => {
@@ -75,7 +73,7 @@ export default function ProductPage() {
     setIsModalOpen(false);
     reset();
     setIsEditing(false);
-    if (!isEditing) {
+    if (imageDelete) {
       deleteImageUpload(imageDelete);
     }
   };
@@ -135,9 +133,6 @@ export default function ProductPage() {
           ...updateData,
         };
         await productAPI.update(dataUpdate);
-        if (imageTemporarily) {
-          deleteImageUpload(imageTemporarily);
-        }
       } else {
         const dataAPI = {
           productName: data.productName,
@@ -186,11 +181,11 @@ export default function ProductPage() {
       const res = await imageAPI.add(param);
       let url = res.url;
       let fileNameRemove = getFileNameRemove(url);
+      if (imageDelete) {
+        deleteImageUpload(imageDelete);
+      }
       setImageData(url);
       setImageDelete(fileNameRemove);
-      if (imageData && fileNameRemove !== imageDelete) {
-        deleteImageUpload(fileNameRemove);
-      }
     };
     reader.readAsDataURL(file);
   };
@@ -204,8 +199,9 @@ export default function ProductPage() {
   const handleDeleteTemporarily = () => {
     setImageData("");
     let imageNameTemporarily = getFileNameRemove(imageData[0]);
-    setImageTemporarily(imageNameTemporarily);
+    deleteImageUpload(imageNameTemporarily);
   };
+
   useEffect(() => {
     if (isModalOpen) {
       setTimeout(() => {
@@ -320,9 +316,15 @@ export default function ProductPage() {
           {imageData ? (
             <div className="form-item">
               <img src={imageData} alt="" width={100} height={100} />
-              <Button danger onClick={handleDeleteTemporarily}>
-                Delete this image
-              </Button>
+              <Popconfirm
+                title="Bạn muốn xóa hình này à?"
+                description="Xóa đi là mất luôn đó nha?"
+                onConfirm={handleDeleteTemporarily}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button danger>Delete</Button>
+              </Popconfirm>
             </div>
           ) : null}
 
