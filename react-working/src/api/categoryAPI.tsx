@@ -1,7 +1,7 @@
 import axiosClients from "./axiosClient";
 
 const categoryAPI = {
-  getAll(params: any) {
+  getAll(params?: any) {
     const url = "/category";
     return axiosClients.get(url, { params });
   },

@@ -73,6 +73,7 @@ export default function ProductPage() {
     setIsModalOpen(false);
     reset();
     setIsEditing(false);
+
     if (imageDelete) {
       deleteImageUpload(imageDelete);
     }
@@ -92,7 +93,7 @@ export default function ProductPage() {
     setIsModalOpen(true);
     setSelectedProduct(product);
     setIsEditing(true);
-    setImageData(product.productImage);
+    setImageData(product.productImage[0] !== "" ? product.productImage : "");
   };
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInStockChecked(e.target.checked);
@@ -178,7 +179,7 @@ export default function ProductPage() {
         image: reader.result,
         fileName: file.name,
       };
-      const res = await imageAPI.add(param);
+      const res: any = await imageAPI.add(param);
       let url = res.url;
       let fileNameRemove = getFileNameRemove(url);
       if (imageDelete) {
@@ -195,6 +196,14 @@ export default function ProductPage() {
       fileName: imageLink,
     };
     await imageAPI.delete(param);
+    const dataAPI = {
+      _id: selectedProduct.id,
+      categoryId: selectedProduct.categoryId,
+      productImage: "",
+    };
+    await productAPI.update(dataAPI);
+    setImageDelete("");
+    fetchData();
   };
   const handleDeleteTemporarily = () => {
     setImageData("");
