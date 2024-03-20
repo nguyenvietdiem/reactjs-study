@@ -8,6 +8,7 @@ import { useDebounce } from "use-debounce";
 import categoryAPI from "../api/categoryAPI";
 import productAPI from "../api/productAPI";
 import imageAPI from "../api/imageAPI";
+import TableCommon from "../component/Table/Table";
 type FieldType = {
   _id?: string;
   categoryId?: string;
@@ -258,10 +259,12 @@ export default function ProductPage() {
           />
         </div>
       </Flex>
-      <Table
-        rowKey="_id"
-        dataSource={data}
-        columns={columns({ fetchData, showModalEdit: showModalEdit })}
+
+      <TableCommon
+        data={data}
+        columns={columns}
+        fetchData={fetchData}
+        showModalEdit={showModalEdit}
       />
 
       <Modal

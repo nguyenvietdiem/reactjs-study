@@ -6,6 +6,7 @@ import { ErrorMessage } from "@hookform/error-message";
 import { PlusOutlined } from "@ant-design/icons";
 import { useForm } from "react-hook-form";
 import categoryAPI from "../api/categoryAPI";
+import TableCommon from "../component/Table/Table";
 
 type FieldType = {
   _id?: string;
@@ -131,10 +132,11 @@ export default function CategoryPage() {
           ]}
         />
       </Flex>
-      <Table
-        rowKey="_id"
-        dataSource={data}
-        columns={columns({ fetchData, showModalEdit: showModalEdit })}
+      <TableCommon
+        data={data}
+        columns={columns}
+        fetchData={fetchData}
+        showModalEdit={showModalEdit}
       />
       <Modal
         title="Create category"
