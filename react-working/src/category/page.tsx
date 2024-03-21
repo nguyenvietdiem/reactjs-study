@@ -1,18 +1,12 @@
-import { Button, Flex, Modal, Select, Table } from "antd";
+import { Button, Flex, Select, Table } from "antd";
 import React, { useEffect, useState } from "react";
 import { columns } from "./_features/columns";
 import { PlusOutlined } from "@ant-design/icons";
-import { useForm } from "react-hook-form";
 import categoryAPI from "../api/categoryAPI";
 import TableCommon from "../component/Table/Table";
 import ModalForm from "../component/Modal/Modal";
 import CategoryForm from "../component/Form/CateogryForm";
 
-type FieldType = {
-  _id?: string;
-  name?: string;
-  description?: string;
-};
 export default function CategoryPage() {
   const [data, setData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
@@ -80,7 +74,7 @@ export default function CategoryPage() {
         showModalEdit={showModalEdit}
       />
       <ModalForm
-        title="Create category"
+        title={isEditing ? 'Edit category': 'Create category'}
         open={isModalOpen}
         onCancel={handleCancel}
       >

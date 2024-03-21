@@ -1,14 +1,10 @@
-import { Button, Modal } from "antd";
+import { Modal } from "antd";
 
 const ModalForm = ({ title, onCancel, open, children }: any) => {
   return (
     <Modal
       title={title}
-      footer={[
-        <Button key="back" onClick={onCancel}>
-          Close
-        </Button>,
-      ]}
+      footer={null}
       open={open}
       onCancel={onCancel}
     >

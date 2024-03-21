@@ -3,11 +3,13 @@ import { Button } from "antd";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import categoryAPI from "../../api/categoryAPI";
+
 type FieldType = {
   _id?: string;
   name?: string;
   description?: string;
 };
+
 const CategoryForm = ({
   selectedCategory,
   isModalOpen,
@@ -15,21 +17,6 @@ const CategoryForm = ({
   handleCancel,
   fetchData,
 }: any) => {
-  useEffect(() => {
-    if (selectedCategory) {
-      setValue("name", selectedCategory.name);
-      setValue("description", selectedCategory.description);
-      setValue("_id", selectedCategory.id);
-    }
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    if (isModalOpen) {
-      setTimeout(() => {
-        setFocus("name");
-      }, 100);
-    }
-  }, [isModalOpen]);
 
   const {
     register,
@@ -40,6 +27,26 @@ const CategoryForm = ({
     formState: { errors },
   } = useForm<FieldType>();
 
+  // Set value when edit
+  useEffect(() => {
+    if (selectedCategory) {
+      setValue("name", selectedCategory.name);
+      setValue("description", selectedCategory.description);
+      setValue("_id", selectedCategory.id);
+    }
+  }, [selectedCategory]);
+
+  // Focus input first 
+  useEffect(() => {
+    if (isModalOpen) {
+      setTimeout(() => {
+        setFocus("name");
+      }, 100);
+    }
+  }, [isModalOpen]);
+
+
+  // Submit form 
   const onSubmit = async (data: any) => {
     let isError = false;
     try {
@@ -75,6 +82,11 @@ const CategoryForm = ({
     }
   };
 
+  const onCancel = () => {
+    handleCancel();
+    reset();
+  }
+
   return (
     <form>
       <input type="hidden" {...register("_id")} />
@@ -91,6 +103,9 @@ const CategoryForm = ({
       <Button onClick={handleSubmit(onSubmit)} type="primary">
         Send
       </Button>
+      <Button key="back" onClick={onCancel}>
+          Close
+        </Button>
     </form>
   );
 };
