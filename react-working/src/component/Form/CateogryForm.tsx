@@ -17,7 +17,6 @@ const CategoryForm = ({
   handleCancel,
   fetchData,
 }: any) => {
-
   const {
     register,
     handleSubmit,
@@ -36,7 +35,7 @@ const CategoryForm = ({
     }
   }, [selectedCategory]);
 
-  // Focus input first 
+  // Focus input first
   useEffect(() => {
     if (isModalOpen) {
       setTimeout(() => {
@@ -45,8 +44,7 @@ const CategoryForm = ({
     }
   }, [isModalOpen]);
 
-
-  // Submit form 
+  // Submit form
   const onSubmit = async (data: any) => {
     let isError = false;
     try {
@@ -85,7 +83,7 @@ const CategoryForm = ({
   const onCancel = () => {
     handleCancel();
     reset();
-  }
+  };
 
   return (
     <form>
@@ -104,8 +102,8 @@ const CategoryForm = ({
         Send
       </Button>
       <Button key="back" onClick={onCancel}>
-          Close
-        </Button>
+        Close
+      </Button>
     </form>
   );
 };
