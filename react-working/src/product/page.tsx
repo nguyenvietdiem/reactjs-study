@@ -15,7 +15,6 @@ export default function ProductPage() {
   const [dataCategory, setDataCategory] = useState<any>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [productName, setProductName] = useState("");
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -24,33 +23,18 @@ export default function ProductPage() {
   const [debouncedValue] = useDebounce(productName, 600);
 
   const fetchData = async () => {
-    try {
-      const params: any = {};
-      if (status && status !== "all") {
-        params.status = status;
-      }
+    const params: any = {
+      status,
+      categoryId,
+      productName,
+    };
 
-      if (categoryId && categoryId !== "all") {
-        params.categoryId = categoryId;
-      }
-
-      if (productName) {
-        params.productName = productName;
-      }
-
-      const res: any = await productAPI.getAll(params);
-      setData(res);
-    } catch (error) {
-      console.log("Error:", error);
-    }
+    const res: any = await productAPI.getAll(params);
+    setData(res);
   };
   const fetchDataCategory = async () => {
-    try {
-      const resCate = await categoryAPI.getAll();
-      setDataCategory(resCate);
-    } catch {
-      console.log("Error");
-    }
+    const resCate = await categoryAPI.getAll();
+    setDataCategory(resCate);
   };
   useEffect(() => {
     fetchData();
@@ -59,7 +43,7 @@ export default function ProductPage() {
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setIsEditing(false);
+    setSelectedProduct(null);
     if (imageDelete) {
       deleteImageUpload(imageDelete);
     }
@@ -73,15 +57,14 @@ export default function ProductPage() {
   const showModalEdit = (product: any) => {
     setIsModalOpen(true);
     setSelectedProduct(product);
-    setIsEditing(true);
     setImageData(product.productImage[0] !== "" ? product.productImage : "");
   };
 
   const handleStatusChange = (value: any) => {
-    setStatus(value);
+    setStatus(value === "all" ? "" : value);
   };
   const handleCategoryChange = (value: any) => {
-    setCategoryId(value);
+    setCategoryId(value === "all" ? "" : value);
   };
 
   const handelSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,14 +134,13 @@ export default function ProductPage() {
       />
 
       <ModalForm
-        title={isEditing ? "Edit Product" : "Create product"}
+        title={selectedProduct ? "Edit Product" : "Create product"}
         open={isModalOpen}
         onCancel={handleCancel}
       >
         <ProductForm
           isModalOpen={isModalOpen}
           dataCategory={dataCategory}
-          isEditing={isEditing}
           handleCancel={handleCancel}
           fetchData={fetchData}
           selectedProduct={selectedProduct}
@@ -168,7 +150,7 @@ export default function ProductPage() {
           setImageData={setImageData}
           setImageDelete={setImageDelete}
           setIsModalOpen={setIsModalOpen}
-          setIsEditing={setIsEditing}
+          setSelectedProduct={setSelectedProduct}
         />
       </ModalForm>
     </div>

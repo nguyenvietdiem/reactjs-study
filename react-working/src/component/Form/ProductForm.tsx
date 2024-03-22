@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import productAPI from "../../api/productAPI";
 import { useEffect, useState } from "react";
 import imageAPI from "../../api/imageAPI";
+import ButtonForm from "./ButtonForm";
 
 type FieldType = {
   _id?: string;
@@ -22,7 +23,6 @@ type FieldType = {
 const ProductForm = ({
   isModalOpen,
   dataCategory,
-  isEditing,
   fetchData,
   handleCancel,
   selectedProduct,
@@ -32,7 +32,7 @@ const ProductForm = ({
   setImageData,
   setImageDelete,
   setIsModalOpen,
-  setIsEditing,
+  setSelectedProduct,
 }: any) => {
   const [inStockChecked, setInStockChecked] = useState(false);
 
@@ -77,8 +77,6 @@ const ProductForm = ({
       let url = res.url;
       let fileNameRemove = getFileNameRemove(url);
       if (imageDelete) {
-        console.log("hihi");
-
         deleteImageUpload(imageDelete);
       }
       setImageData(url);
@@ -106,9 +104,7 @@ const ProductForm = ({
   const onSubmit = async (data: any) => {
     let isError = false;
     try {
-      if (isEditing) {
-        console.log("editing");
-
+      if (selectedProduct) {
         const updateData: any = {};
         if (data.productName !== selectedProduct.productName) {
           updateData["productName"] = data.productName;
@@ -139,12 +135,11 @@ const ProductForm = ({
       }
     } catch (error: any) {
       isError = true;
-      console.log(error.toString());
     }
     if (!isError) {
       reset();
       setIsModalOpen(false);
-      setIsEditing(false);
+      setSelectedProduct(null);
       fetchData();
     }
   };
@@ -215,7 +210,7 @@ const ProductForm = ({
         </div>
       ) : null}
 
-      <div style={{ display: isEditing ? "none" : "block" }}>
+      <div style={{ display: selectedProduct ? "none" : "block" }}>
         <div className="form-item">
           <label htmlFor="">Quantity</label>
           <input {...register("quantity")} placeholder="0" />
@@ -241,18 +236,13 @@ const ProductForm = ({
           <label htmlFor="">Note *</label>
           <input
             {...register("note", {
-              required: isEditing ? false : "This is required.",
+              required: selectedProduct ? false : "This is required.",
             })}
           />
           <ErrorMessage errors={errors} name="note" />
         </div>
       </div>
-      <Button onClick={handleSubmit(onSubmit)} type="primary">
-        Send
-      </Button>
-      <Button key="back" onClick={onCancel}>
-        Close
-      </Button>
+      <ButtonForm onSubmit={handleSubmit(onSubmit)} onCancel={onCancel} />
     </form>
   );
 };

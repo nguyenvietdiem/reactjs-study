@@ -3,6 +3,7 @@ import { Button } from "antd";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import categoryAPI from "../../api/categoryAPI";
+import ButtonForm from "./ButtonForm";
 
 type FieldType = {
   _id?: string;
@@ -98,12 +99,7 @@ const CategoryForm = ({
         />
         <ErrorMessage errors={errors} name="description" />
       </div>
-      <Button onClick={handleSubmit(onSubmit)} type="primary">
-        Send
-      </Button>
-      <Button key="back" onClick={onCancel}>
-        Close
-      </Button>
+      <ButtonForm onSubmit={handleSubmit(onSubmit)} onCancel={onCancel} />
     </form>
   );
 };
