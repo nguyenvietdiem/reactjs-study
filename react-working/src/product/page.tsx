@@ -127,6 +127,7 @@ export default function ProductPage() {
       </Flex>
 
       <TableCommon
+        rowKey="_id"
         data={data}
         columns={columns}
         fetchData={fetchData}

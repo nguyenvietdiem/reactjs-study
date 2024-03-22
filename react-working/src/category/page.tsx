@@ -68,13 +68,14 @@ export default function CategoryPage() {
         />
       </Flex>
       <TableCommon
+        rowKey="_id"
         data={data}
         columns={columns}
         fetchData={fetchData}
         showModalEdit={showModalEdit}
       />
       <ModalForm
-        title={isEditing ? 'Edit category': 'Create category'}
+        title={isEditing ? "Edit category" : "Create category"}
         open={isModalOpen}
         onCancel={handleCancel}
       >
