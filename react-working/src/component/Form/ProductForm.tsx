@@ -87,7 +87,7 @@ const ProductForm = ({
   // Delete image when click button delete
   const handleDeleteTemporarily = () => {
     setImageData("");
-    let imageNameTemporarily = getFileNameRemove(imageData);
+    let imageNameTemporarily = getFileNameRemove(imageData[0]);
     deleteImageUpload(imageNameTemporarily);
   };
 
