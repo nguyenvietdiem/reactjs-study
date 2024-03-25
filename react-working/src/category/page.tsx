@@ -70,9 +70,7 @@ export default function CategoryPage() {
       <TableCommon
         rowKey="_id"
         data={data}
-        columns={columns}
-        fetchData={fetchData}
-        showModalEdit={showModalEdit}
+        columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />
       <ModalForm
         title={isEditing ? "Edit category" : "Create category"}

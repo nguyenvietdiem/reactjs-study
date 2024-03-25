@@ -129,9 +129,7 @@ export default function ProductPage() {
       <TableCommon
         rowKey="_id"
         data={data}
-        columns={columns}
-        fetchData={fetchData}
-        showModalEdit={showModalEdit}
+        columns={columns({ fetchData, showModalEdit: showModalEdit })}
       />
 
       <ModalForm

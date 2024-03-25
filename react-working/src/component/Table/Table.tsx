@@ -1,19 +1,7 @@
 import { Table } from "antd";
 
-const TableCommon = ({
-  rowKey,
-  data,
-  columns,
-  fetchData,
-  showModalEdit,
-}: any) => {
-  return (
-    <Table
-      rowKey={rowKey}
-      dataSource={data}
-      columns={columns({ fetchData, showModalEdit: showModalEdit })}
-    />
-  );
+const TableCommon = ({ rowKey, data, columns }: any) => {
+  return <Table rowKey={rowKey} dataSource={data} columns={columns} />;
 };
 
 export default TableCommon;
