@@ -10,6 +10,9 @@ const onChange = async (checked: string, id: string, fetchData: Function) => {
   await productAPI.update(param);
   fetchData();
 };
+const momentDateFormat = (value: any) => {
+  return moment(value).format("YYYY/MM/DD");
+};
 export const columns = ({ fetchData, showModalEdit }: any) => {
   return [
     {
@@ -53,15 +56,13 @@ export const columns = ({ fetchData, showModalEdit }: any) => {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value: string, record: any) =>
-        moment(value).format("YYYY/MM/DD"),
+      render: (value: string, record: any) => momentDateFormat(value),
     },
     {
       title: "Update At",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (value: string, record: any) =>
-        moment(value).format("YYYY/MM/DD"),
+      render: (value: string, record: any) => momentDateFormat(value),
     },
     {
       title: "Action",
