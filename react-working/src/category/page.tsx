@@ -5,7 +5,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import categoryAPI from "../api/categoryAPI";
 import TableCommon from "../component/Table/Table";
 import ModalForm from "../component/Modal/Modal";
-import CategoryForm from "../component/Form/CateogryForm";
+import CategoryForm from "../component/Form/CategoryForm";
 
 export default function CategoryPage() {
   const [data, setData] = useState([]);

@@ -57,17 +57,7 @@ export const columns = ({ fetchData, showModalEdit }: any) => {
       dataIndex: "action",
       key: "action",
       render: (value: any, record: any) => (
-        <Button
-          type="primary"
-          onClick={(event: React.MouseEvent<HTMLDivElement>) =>
-            showModalEdit({
-              event,
-              id: record._id,
-              name: record.name,
-              description: record.description,
-            })
-          }
-        >
+        <Button type="primary" onClick={() => showModalEdit(record)}>
           Edit
         </Button>
       ),

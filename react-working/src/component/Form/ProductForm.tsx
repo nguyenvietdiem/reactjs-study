@@ -42,9 +42,9 @@ const ProductForm = ({
 
   useEffect(() => {
     if (selectedProduct) {
-      setValue("_id", selectedProduct.id);
+      setValue("_id", selectedProduct._id);
       setValue("productName", selectedProduct.productName);
-      setValue("categoryId", selectedProduct.categoryId);
+      setValue("categoryId", selectedProduct.category._id);
       setValue("productFormat", selectedProduct.productFormat.join("\n"));
       setValue("productDescription", selectedProduct.productDescription);
     }
@@ -117,6 +117,7 @@ const ProductForm = ({
           productImage: imageData,
           ...updateData,
         };
+
         await productAPI.update(dataUpdate);
       } else {
         const dataAPI = {

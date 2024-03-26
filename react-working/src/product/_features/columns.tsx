@@ -72,14 +72,7 @@ export const columns = ({ fetchData, showModalEdit }: any) => {
         <Button
           type="primary"
           onClick={() => {
-            showModalEdit({
-              id: record._id,
-              productName: record.productName,
-              productFormat: record.productFormat,
-              productImage: record.productImage,
-              productDescription: record.productDescription,
-              categoryId: record.category._id,
-            });
+            showModalEdit(record);
           }}
         >
           Edit
