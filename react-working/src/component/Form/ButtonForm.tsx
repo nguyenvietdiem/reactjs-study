@@ -1,12 +1,9 @@
 import { Button } from "antd";
 
-const ButtonForm = ({ onSubmit, onCancel }: any) => {
-  const handleSubmit = () => {
-    onSubmit();
-  };
+const ButtonForm = ({ id, onCancel }: any) => {
   return (
     <div>
-      <Button onClick={handleSubmit} type="primary">
+      <Button htmlType="submit" form={id} type="primary">
         Send
       </Button>
       <Button key="back" onClick={onCancel}>

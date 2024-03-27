@@ -32,7 +32,7 @@ const CategoryForm = ({
     if (selectedCategory) {
       setValue("name", selectedCategory.name);
       setValue("description", selectedCategory.description);
-      setValue("_id", selectedCategory.id);
+      setValue("_id", selectedCategory._id);
     }
   }, [selectedCategory]);
 
@@ -87,7 +87,7 @@ const CategoryForm = ({
   };
 
   return (
-    <form>
+    <form id="form_category" onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" {...register("_id")} />
       <div>
         <input {...register("name", { required: "This is required." })} />
@@ -99,7 +99,10 @@ const CategoryForm = ({
         />
         <ErrorMessage errors={errors} name="description" />
       </div>
-      <ButtonForm onSubmit={handleSubmit(onSubmit)} onCancel={onCancel} />
+      <ButtonForm
+        id="form_category"
+        onCancel={onCancel}
+      />
     </form>
   );
 };

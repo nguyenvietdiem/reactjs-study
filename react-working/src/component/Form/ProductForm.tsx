@@ -151,7 +151,7 @@ const ProductForm = ({
     reset();
   };
   return (
-    <form>
+    <form id="form_product" onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" {...register("_id")} />
       <div className="form-item">
         <label htmlFor="">Name *</label>
@@ -243,7 +243,7 @@ const ProductForm = ({
           <ErrorMessage errors={errors} name="note" />
         </div>
       </div>
-      <ButtonForm onSubmit={handleSubmit(onSubmit)} onCancel={onCancel} />
+      <ButtonForm id="form_product" onCancel={onCancel} />
     </form>
   );
 };
