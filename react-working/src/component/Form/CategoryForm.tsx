@@ -99,10 +99,7 @@ const CategoryForm = ({
         />
         <ErrorMessage errors={errors} name="description" />
       </div>
-      <ButtonForm
-        id="form_category"
-        onCancel={onCancel}
-      />
+      <ButtonForm id="form_category" onCancel={onCancel} />
     </form>
   );
 };
